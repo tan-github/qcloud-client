@@ -35,9 +35,11 @@ class Test
 
         require_once 'Signature.php';
         require_once 'QcloudClient.php';
-        $test = new QcloudClient($sign_info);
+        $test = new QcloudClient($sign_info,'http://ap-shanghai.cls.tencentcs.com');
+//        $test->setDomain('http://ap-shanghai.cls.tencentcs.com');
+        $rs = $test->search($params);
 
-        var_dump($test->search($params));
+        var_dump($rs);
     }
 }
 

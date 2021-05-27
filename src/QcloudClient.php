@@ -10,14 +10,32 @@ namespace QcloudClient;
 
 class QcloudClient
 {
+    //签名生成的token
     private $auth = '';
+    //接口域名
     private $domain = '';
 
-    public function __construct($sign_info)
+    /**
+     * 接口域名
+     * @param string $domain
+     */
+    public function setDomain($domain)
+    {
+        $this->domain = $domain;
+    }
+
+    /**
+     * QcloudClient constructor.
+     * @param $sign_info 签名参数
+     * @param string $domain 接口域名
+     */
+    public function __construct($sign_info, $domain = '')
     {
         $this->auth = Signature::getSignature($sign_info);
 
-        $this->domain = 'http://ap-shanghai.cls.tencentcs.com';
+        if ($domain) {
+            $this->domain = $domain;
+        }
     }
 
     /**
@@ -27,7 +45,7 @@ class QcloudClient
      */
     public function search($params)
     {
-        $url = $this->domain.'/searchlog?';
+        $url = $this->domain . '/searchlog?';
 
         $rs = $this->callCurl(
             $url . http_build_query($params),
@@ -42,7 +60,6 @@ class QcloudClient
     }
 
 
-
     /**
      * 调用curl
      * @param $url
@@ -50,12 +67,12 @@ class QcloudClient
      * @param array $params
      * @return bool|mixed
      */
-    public function callCurl($url, $data = array(), $params = array())
+    private function callCurl($url, $data = array(), $params = array())
     {
         $timeout = 5;
         if (isset($params['method']) && $params['method']) {
             $method = strtoupper($params['method']);
-        }else{
+        } else {
             $method = 'POST';
         }
 
@@ -69,7 +86,7 @@ class QcloudClient
         $headers = array('Accept: application/json', 'Content-Type: application/json');
 
         if (isset($params['token']) && $params['token']) {
-            $headers[] = 'Authorization: Bearer ' . $params['token'];
+            $headers[] = 'Authorization:' . $params['token'];
         }
 
         $ch = curl_init();
@@ -81,10 +98,10 @@ class QcloudClient
         curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, $timeout);//5秒
         curl_setopt($ch, CURLOPT_TIMEOUT, $timeout);//5秒
 
-        curl_setopt($ch, CURLOPT_HTTPAUTH,      CURLAUTH_BASIC);
-        curl_setopt($ch, CURLOPT_USERPWD,       $auth_username .':'. $auth_password);
+        curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
+        curl_setopt($ch, CURLOPT_USERPWD, $auth_username . ':' . $auth_password);
 
-        switch($method) {
+        switch ($method) {
             case 'GET' :
                 break;
             case 'POST' :
@@ -104,9 +121,9 @@ class QcloudClient
                 break;
         }
 
-        if( !curl_errno($ch)){
+        if (!curl_errno($ch)) {
             $response = json_decode(curl_exec($ch), true);
-        }else{
+        } else {
             $response = false;
         }
 
