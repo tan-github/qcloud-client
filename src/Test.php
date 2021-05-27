@@ -13,30 +13,26 @@ class Test
     {
         /*************************** 测试 *******************************/
         //签名参数
-        $sign_info = array(
-            'secret_id'=>'xxxxxxxxxxxxxxxxxxxx',
-            'secret_key'=>'xxxxxxxxxxxxxxxxxxxxxx',
-            'method'=>'GET',
-            'path'=> '/searchlog',
-            'params'=>array('logset_id' => 'xxxxxxxxxxxxxxxxxxx'),
-            'headers'=> array('Host' => 'ap-shanghai.cls.tencentcs.com', 'User-Agent' => 'AuthSDK'),
-            'expire'=>300
+        $config = array(
+            'secret_id' => 'xxxxxxxxxxxxxxxxxxxx',
+            'secret_key' => 'xxxxxxxxxxxxxxxxxxxxxxx',
+            'logset_id' => 'xxxxxxxxxxxxxxxx',
+            'topic_ids' => 'xxxxxxxxxxxxxxxxxxxx',
+            'host' => 'ap-xxxxx.cls.tencentcs.com'
         );
+
         //查询参数
         $params = array(
-            'logset_id' => 'xxxxxxxxxxxxxxxxxxxxx',
-            'topic_ids' => 'xxxxxxxxxxxxxxxxxxx',
-            'start_time' => '2021-03-31 00:00:01',
-            'end_time' => '2021-03-31 23:00:00',
-            'query_string' => 'aa:5',
+            'start_time' => '2021-05-27 22:04:20',
+            'end_time' => '2021-05-27 22:04:29',
+            'query_string' => 'message:2133',
             'limit' => 10,
-            // 'context' => 'context= HTTP/1.1',
+//            'context' => 'context= HTTP/1.1',
         );
 
         require_once 'Signature.php';
         require_once 'QcloudClient.php';
-        $test = new QcloudClient($sign_info,'http://ap-shanghai.cls.tencentcs.com');
-//        $test->setDomain('http://ap-shanghai.cls.tencentcs.com');
+        $test = new QcloudClient($config);
         $rs = $test->search($params);
 
         var_dump($rs);

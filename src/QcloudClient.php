@@ -10,49 +10,135 @@ namespace QcloudClient;
 
 class QcloudClient
 {
-    //签名生成的token
-    private $auth = '';
-    //接口域名
-    private $domain = '';
+    private $secret_id = '';
+    private $secret_key = '';
+    //日志集
+    private $logset_id = '';
+    //日志主题
+    private $topic_ids = '';
+    //接口host
+    private $host = '';
+    //请求方法
+    private $method = 'GET';
+    //过期时间（秒）
+    private $expire = 300;
 
     /**
-     * 接口域名
-     * @param string $domain
+     * 日志集
+     * @param string $logset_id
      */
-    public function setDomain($domain)
+    public function setLogsetId($logset_id)
     {
-        $this->domain = $domain;
+        $this->logset_id = $logset_id;
     }
 
     /**
-     * QcloudClient constructor.
-     * @param $sign_info 签名参数
-     * @param string $domain 接口域名
+     * 日志主题
+     * @param string $topic_ids
      */
-    public function __construct($sign_info, $domain = '')
+    public function setTopicIds($topic_ids)
     {
-        $this->auth = Signature::getSignature($sign_info);
+        $this->topic_ids = $topic_ids;
+    }
 
-        if ($domain) {
-            $this->domain = $domain;
+    /**
+     * 接口host
+     * @param string $host
+     */
+    public function setHost($host)
+    {
+        $this->host = $host;
+    }
+
+
+    /**
+     * 请求方法
+     * @param string $method
+     */
+    public function setMethod($method)
+    {
+        $this->method = strtoupper($method);
+    }
+
+    /**
+     * 过期时间（秒）
+     * @param int $expire
+     */
+    public function setExpire($expire)
+    {
+        $this->expire = $expire;
+    }
+
+
+    /**
+     * QcloudClient constructor.
+     * @param $config
+     *
+     * $config = array(
+     * 'secret_id' => 'xxxxxxxxxxxxxxxxxxxx',
+     * 'secret_key' => 'xxxxxxxxxxxxxxxxxxxxxxx',
+     * 'logset_id' => 'xxxxxxxxxxxxxxxx',
+     * 'topic_ids' => 'xxxxxxxxxxxxxxxxxxxx',
+     * 'host' => 'ap-xxxxx.cls.tencentcs.com'
+     * );
+     */
+    public function __construct($config)
+    {
+        foreach ($config as $key => $value) {
+            $this->$key = $value;
         }
+
+    }
+
+    /**
+     * 获取签名
+     * @param $path
+     * @return Signature
+     */
+    private function getSignature($path)
+    {
+        //签名参数
+        $sign_info = array(
+            'secret_id' => $this->secret_id,
+            'secret_key' => $this->secret_key,
+            'method' => $this->method,
+//            'path'=> '/searchlog',
+            'path' => $path,
+            'params' => array('logset_id' => $this->logset_id),
+            'headers' => array('Host' => $this->host, 'User-Agent' => 'AuthSDK'),
+            'expire' => $this->expire
+        );
+        return Signature::getSignature($sign_info);
     }
 
     /**
      * 查询日志
-     * @param $params
+     * @param $params 参数
+     * $params = array(
+     * 'start_time' => '2021-05-27 22:04:20',
+     * 'end_time' => '2021-05-27 22:04:29',
+     * 'query_string' => 'message.schoolId:2133',
+     * 'limit' => 10,
+     * //  'context' => 'context= HTTP/1.1',
+     * );
      * @return bool|mixed
      */
     public function search($params)
     {
-        $url = $this->domain . '/searchlog?';
+        $path = '/searchlog';
+
+        $url = 'http://' . $this->host . $path . '?';
+        $auth = $this->getSignature($path);
+
+        $params['logset_id'] = $this->logset_id;
+        $params['topic_ids'] = $this->topic_ids;
 
         $rs = $this->callCurl(
             $url . http_build_query($params),
             array(),
             array(
-                'token' => $this->auth,
-                'method' => 'GET'
+                'token' => $auth,
+                'method' => $this->method
             )
         );
 
