@@ -1,0 +1,14 @@
+{
+    "name": "tan-github/qcloud-client",
+    "description": "腾讯云日志客户端",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "tan",
+            "email": "923360732@qq.com"
+        }
+    ],
+    "minimum-stability": "stable",
+    "require": {}
+}
